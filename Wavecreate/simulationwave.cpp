@@ -91,13 +91,13 @@ mtx.unlock();
         float cosalpha = Wave->GetCosAlpha();
         for (int i = beginRow; i < endRow; i++) {
             float WaveRowPosition = Wave->ZeroPosition - i * sinalpha / cosalpha;
-            waveboundlow = WaveRowPosition - abs(Wave->Width / (2*cosalpha));				//Границы волны для данной строки
+            waveboundlow = WaveRowPosition - abs(Wave->Width / (2*cosalpha));
             waveboundup =  WaveRowPosition + abs(Wave->Width / (2*cosalpha));
 
 
             for (int j = 0; j < sourceImage.cols ; j++) {
 
-                if ( j < waveboundup-1 && j > waveboundlow+1)       //Check whether current pixel belongs to the wave
+                if ( j < int(waveboundup) && j > int(waveboundlow+1))       //Check whether current pixel belongs to the wave
                 {
                     float radius= WaveRowPosition - j;				//distance to the wave crest in the current row
                     int Irad = abs(int(radius));					//Round distance to the wave crest in the current
@@ -154,7 +154,7 @@ void BlendByCol(int &Nthread,cv::Mat& sourceImage, cv::Mat& targetImage,class Wa
 
             for (int i = 0; i < sourceImage.rows; i++) {
 
-                if (i < waveboundup-1 && i > waveboundlow+1)        //Check whether current pixel belongs to the wave
+                if (i < int(waveboundup) && i > int(waveboundlow+1))        //Check whether current pixel belongs to the wave
                 {
                     float radius = WaveColPosition - i;             //distance to the wave crest in the current column
                     int Irad = abs(int(radius));					//Round distance to the wave crest in the current column
@@ -200,10 +200,10 @@ void  blendWaveImage(cv::Mat& sourceImage, cv::Mat& targetImage,class Wave* Wave
             i++;
         }
         int ntr=0;
-        Th[0]=std::thread([&](){BlendByRow(ntr,sourceImage,targetImage,Wave);});
+        BlendByRow(ntr,sourceImage,targetImage,Wave);
 
 
-        for(int i = 0;i < Wave->ThreadsCount;){
+        for(int i = 1;i < Wave->ThreadsCount;){
             if(Th[i].joinable())
                 Th[i].join();
             i++;
@@ -218,10 +218,10 @@ void  blendWaveImage(cv::Mat& sourceImage, cv::Mat& targetImage,class Wave* Wave
              i++;
         }
          int ntr=0;
-             Th[0]=std::thread([&](){BlendByCol(ntr,sourceImage,targetImage,Wave);});
+         BlendByCol(ntr,sourceImage,targetImage,Wave);
 
 
-          for(int i=0;i<Wave->ThreadsCount;){
+          for(int i=1;i<Wave->ThreadsCount;){
               if(Th[i].joinable())
                     Th[i].join();
             i++;
